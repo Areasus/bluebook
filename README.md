@@ -1,6 +1,6 @@
 # bluebook
 
-A new Flutter project.
+TRY OUT:https://areasus.github.io/bluebook-web
 
 ## Getting Started
 
