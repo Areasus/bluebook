@@ -1,27 +1,104 @@
-import 'dart:ffi';
-
-import 'package:nepali_date_picker/nepali_date_picker.dart' as picker;
 import 'package:flutter/material.dart';
 
+var rate;
+
 var providence = [
-  'Province-1',
-  'Province-2',
-  'Province-3',
-  'Gandaki',
-  'Province-5',
-  'karnali',
-  'Sudurpashchim',
+  {
+    "id": 1,
+    "name": "Province 1",
+  },
+  {
+    "id": 2,
+    "name": "Province 2 (Madhesh)",
+  },
+  {
+    "id": 3,
+    "name": "Province 3 (Bagmati)",
+  },
+  {
+    "id": 4,
+    "name": "Province 4 (Gandaki)",
+  },
+  {
+    "id": 5,
+    "name": "Province 5 (Lumbini)",
+  },
+  {
+    "id": 6,
+    "name": "Province 6 (Karnali)",
+  },
+  {
+    "id": 7,
+    "name": "Province 7 (Sudurpaschim)",
+  }
 ];
 var vehicle = [
-  'bike/scooter',
-  'Car, Jeep, Van, And MicroBus',
+  {
+    "id": 1,
+    "name": 'bike/scooter',
+  },
+  // {
+  //   "id": 2,
+  //   "name": 'Car, Jeep, Van, And MicroBus',
+  // }
 ];
-var displacement = [
-  '150',
-  '200',
-];
+
+var displacement = [];
+
+var loadData = {
+  "1": [
+    {"id": 5, "cc": "More than 400 CC", "rate": 18000},
+    {"id": 4, "cc": "251 CC - 400 CC", "rate": 10000},
+    {"id": 3, "cc": "161 CC - 250 CC", "rate": 5500},
+    {"id": 2, "cc": "126 CC - 160 CC", "rate": 4000},
+    {"id": 1, "cc": "Up to 125 CC", "rate": 3000}
+  ],
+  "2": [
+    {"id": 5, "cc": "More than 400 CC", "rate": 17000},
+    {"id": 4, "cc": "251 CC - 400 CC", "rate": 10000},
+    {"id": 3, "cc": "161 CC - 250 CC", "rate": 6000},
+    {"id": 2, "cc": "126 CC - 160 CC", "rate": 4500},
+    {"id": 1, "cc": "Up to 125 CC", "rate": 2700}
+  ],
+  "3": [
+    {"id": 6, "cc": "More than 650 CC", "rate": 30000},
+    {"id": 5, "cc": "401 CC - 650 CC ", "rate": 20000},
+    {"id": 4, "cc": "226 CC - 400 CC", "rate": 11000},
+    {"id": 3, "cc": "161 CC - 225 CC", "rate": 6500},
+    {"id": 2, "cc": "126 CC - 160 CC", "rate": 5000},
+    {"id": 1, "cc": "Up to 125 CC", "rate": 3000}
+  ],
+  "4": [
+    {"id": 5, "cc": "More than 650 CC", "rate": 30000},
+    {"id": 4, "cc": "401 CC - 650 CC", "rate": 20000},
+    {"id": 3, "cc": "226 CC - 400 CC", "rate": 11000},
+    {"id": 2, "cc": "161 CC - 225 CC", "rate": 6500},
+    {"id": 2, "cc": "126 CC - 160 CC", "rate": 5000},
+    {"id": 1, "cc": "Up to 125 CC", "rate": 3000}
+  ],
+  "5": [
+    {"id": 5, "cc": "More than 400 CC", "rate": 25000},
+    {"id": 4, "cc": "251 CC - 400 CC", "rate": 11000},
+    {"id": 3, "cc": "161 CC - 250 CC", "rate": 5500},
+    {"id": 2, "cc": "126 CC - 160 CC", "rate": 4500},
+    {"id": 1, "cc": "Up to 125 CC", "rate": 2600}
+  ],
+  "6": [
+    {"id": 4, "cc": "More than 400 CC", "rate": 15000},
+    {"id": 3, "cc": "251 CC - 400 CC", "rate": 8000},
+    {"id": 2, "cc": "126 CC - 250 CC ", "rate": 4000},
+    {"id": 1, "cc": "Up to 125 CC", "rate": 2500}
+  ],
+  "7": [
+    {"id": 5, "cc": "More than 400 CC", "rate": 9000},
+    {"id": 4, "cc": "251 CC - 400 CC", "rate": 8000},
+    {"id": 3, "cc": "151 CC - 250 CC ", "rate": 5500},
+    {"id": 2, "cc": "126 CC - 150 CC", "rate": 4500},
+    {"id": 1, "cc": "Up to 125 CC", "rate": 2500}
+  ]
+};
 var result = "";
-int expDate = 0;
+var fine = "";
 void main() {
   runApp(const MyApp());
 }
@@ -52,14 +129,26 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  Future<void> AllCcs() async {
+    final response = await loadallCcs(loadData['1']);
+    setState(() {
+      displacement = response;
+    });
+  }
+
   @override
-  String providenceValue = providence[0];
-  String vehicleValue = vehicle[0];
-  String displacementValue = displacement[0];
+  void initState() {
+    this.AllCcs();
+    // super.initState();
+  }
+
+  var expDateC = TextEditingController();
+  String providenceValue = providence.first['id'].toString();
+  String vehicleValue = vehicle.first['id'].toString();
+  String displacementValue = loadCcs(loadData['1']);
   Color defColor = Colors.green;
   var dateCOntroller = TextEditingController();
-
-  // List of items in our dropdown menu
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -81,10 +170,26 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Center(
                     child: Image.asset(
                       'assets/images/logo.png',
-                      height: 200,
-                      width: 200,
+                      height: 150,
+                      width: 150,
                     ),
                   ),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                      result,
+                      style: TextStyle(color: defColor, fontSize: 20),
+                    ),
+                    Text(
+                      fine,
+                      style: TextStyle(color: Colors.grey, fontSize: 18),
+                    ),
+                  ],
                 ),
                 SizedBox(
                   height: 15,
@@ -108,17 +213,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   // dropdownColor: Colors.blue,
                   value: providenceValue,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      providenceValue = newValue!;
-                    });
+                  onChanged: (String? newValue) async {
+                    providenceValue = newValue!;
+                    displacementValue = loadCcs(loadData[providenceValue]);
+                    final res = await loadallCcs(loadData[providenceValue]);
+                    displacement = res;
+                    setState(() {});
                   },
-                  items:
-                      providence.map<DropdownMenuItem<String>>((String value) {
+                  items: providence.map<DropdownMenuItem<String>>((value) {
                     return DropdownMenuItem<String>(
-                      value: value,
+                      value: value['id'].toString(),
                       child: Text(
-                        value,
+                        value['name'].toString(),
                         style: TextStyle(fontSize: 18),
                       ),
                     );
@@ -149,13 +255,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   onChanged: (String? newValue) {
                     setState(() {
                       vehicleValue = newValue!;
+                      // print(vehicleValue);
                     });
                   },
-                  items: vehicle.map<DropdownMenuItem<String>>((String value) {
+                  items: vehicle.map<DropdownMenuItem<String>>((value) {
                     return DropdownMenuItem<String>(
-                      value: value,
+                      value: value['id'].toString(),
                       child: Text(
-                        value,
+                        value['name'].toString(),
                         style: TextStyle(fontSize: 18),
                       ),
                     );
@@ -186,14 +293,22 @@ class _MyHomePageState extends State<MyHomePage> {
                   onChanged: (String? newValue) {
                     setState(() {
                       displacementValue = newValue!;
+                      // print(displacementValue);
+                      var temp = loadData[providenceValue];
+                      if (temp != null) {
+                        temp.forEach((e) {
+                          if (e["cc"] == displacementValue) {
+                            rate = e["rate"];
+                          }
+                        });
+                      }
                     });
                   },
-                  items: displacement
-                      .map<DropdownMenuItem<String>>((String value) {
+                  items: displacement.map<DropdownMenuItem<String>>((value) {
                     return DropdownMenuItem<String>(
-                      value: value,
+                      value: value.toString(),
                       child: Text(
-                        value,
+                        value.toString(),
                         style: TextStyle(fontSize: 18),
                       ),
                     );
@@ -202,57 +317,78 @@ class _MyHomePageState extends State<MyHomePage> {
                 SizedBox(
                   height: 15,
                 ),
-                OutlinedButton(
-                  onPressed: () async {
-                    DateTime? date = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2023),
-                      lastDate: DateTime(2030),
-                    );
-                    dateCOntroller.text = date.toString();
-                    if (date != null) {
-                      expDate = date.difference(DateTime.now()).inDays;
-                      // result = "Total Cost:$expDate";
-                    }
-                    setState(() {});
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      0.0,
-                      18,
-                      0.0,
-                      18,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Expiry Date",
-                          style: TextStyle(
-                            color: Color.fromRGBO(0, 0, 0, 0.7),
-                            fontSize: 20,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Icon(
-                          Icons.date_range_outlined,
-                          color: Colors.black,
-                        ),
-                      ],
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 239, 239, 239),
-                    side: BorderSide(
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    shape: RoundedRectangleBorder(
+                // OutlinedButton(
+                //   onPressed: () async {
+                //     DateTime? date = await showDatePicker(
+                //       context: context,
+                //       initialDate: DateTime.now(),
+                //       firstDate: DateTime(2023),
+                //       lastDate: DateTime(2030),
+                //     );
+                //     dateCOntroller.text = date.toString();
+                //     if (date != null) {
+                //       expDate = date.difference(DateTime.now()).inDays;
+                //       print(expDate);
+                //       // result = "Total Cost:$expDate";
+                //     }
+                //     setState(() {});
+                //   },
+                //   child: Padding(
+                //     padding: const EdgeInsets.fromLTRB(
+                //       0.0,
+                //       18,
+                //       0.0,
+                //       18,
+                //     ),
+                //     child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //       children: [
+                //         Text(
+                //           "Expiry Date",
+                //           style: TextStyle(
+                //             color: Color.fromRGBO(0, 0, 0, 0.7),
+                //             fontSize: 20,
+                //             fontWeight: FontWeight.normal,
+                //           ),
+                //         ),
+                //         SizedBox(
+                //           width: 10,
+                //         ),
+                //         Icon(
+                //           Icons.date_range_outlined,
+                //           color: Colors.black,
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                //   style: OutlinedButton.styleFrom(
+                //     backgroundColor: Color.fromARGB(255, 239, 239, 239),
+                //     side: BorderSide(
+                //       width: 1,
+                //       color: Colors.grey,
+                //     ),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(10),
+                //     ),
+                //   ),
+                // ),
+                TextField(
+                  controller: expDateC,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 242, 242, 242),
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colors.black,
+                      ),
+                    ),
+                    label: Text('Expired days'),
+                    hintText: "if not expired 0",
+                    suffixIcon: Icon(
+                      Icons.date_range_outlined,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -261,18 +397,37 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if (expDate > 90) {
-                      double total = 10000;
-                      result = "Total Cost:$total";
-                      defColor = Colors.red;
-                    } else if (expDate > 0 && expDate < 90) {
-                      double total = 1000;
-                      result = "Total Cost:$total";
-                      defColor = Colors.green;
+                    if (rate != null && expDateC.text != '') {
+                      int expDate = int.parse(expDateC.text.toString());
+                      if (expDate > 365) {
+                        double total = rate + (rate * 32 / 100);
+                        result = "Total Cost:$total";
+                        fine = "(with 32% fine)";
+                        defColor = Colors.red;
+                      } else if (expDate > 76 && expDate <= 365) {
+                        double total = rate + (rate * 20 / 100);
+                        result = "Total Cost:$total";
+                        fine = "(with 20% fine)";
+                        defColor = Colors.red;
+                      } else if (expDate > 30 && expDate <= 76) {
+                        double total = rate + (rate * 10 / 100);
+                        result = "Total Cost:$total";
+                        fine = "(with 10% fine)";
+                        defColor = Colors.red;
+                      } else if (expDate <= 30 && expDate > 1) {
+                        double total = rate + (rate * 5 / 100);
+                        fine = "(with 5% fine)";
+                        result = "Total Cost:$total";
+                        defColor = Colors.red;
+                      } else {
+                        double total = rate * 1.0;
+                        fine = "(with 0% fine)";
+                        result = "Total Cost:$total";
+                        defColor = Colors.green;
+                      }
                     } else {
-                      double total = 100;
-                      result = "Total Cost:$total";
-                      defColor = Colors.grey;
+                      result = "Please fill all feilds";
+                      defColor = Colors.red;
                     }
                     setState(() {});
                   },
@@ -284,15 +439,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  child: Text(
-                    result,
-                    style: TextStyle(color: defColor, fontSize: 25),
-                  ),
-                ),
               ],
             ),
           ),
@@ -300,4 +446,18 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+loadCcs(prov1) {
+  if (prov1 != null) {
+    return prov1[0]['cc'].toString();
+  }
+}
+
+loadallCcs(prov1) {
+  List abc = [];
+  for (var p in prov1) {
+    abc.add(p['cc'].toString());
+  }
+  return abc;
 }
